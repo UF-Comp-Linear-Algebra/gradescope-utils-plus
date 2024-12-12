@@ -52,6 +52,10 @@ class JSONTestResult(result.TestResult):
         sort_order = getattr(getattr(test, test._testMethodName), '__leaderboard_sort_order__', None)
         value = getattr(getattr(test, test._testMethodName), '__leaderboard_value__', None)
         return (column_name, sort_order, value)
+    
+    def getExtraData(self, test):
+        extra_data = getattr(getattr(test, test._testMethodName), '__extra_data__', {})
+        return {str(k): str(v) for (k, v) in extra_data.items()}
 
     def startTest(self, test):
         super(JSONTestResult, self).startTest(test)
@@ -75,6 +79,7 @@ class JSONTestResult(result.TestResult):
         hide_errors_message = self.getHideErrors(test)
         score = self.getScore(test)
         output = self.getOutput() or ""
+        extra_data = self.getExtraData(test)
         if err:
             if hide_errors_message:
                 output += hide_errors_message
@@ -109,6 +114,8 @@ class JSONTestResult(result.TestResult):
             result["visibility"] = visibility
         if number:
             result["number"] = number
+        if extra_data:
+            result["extra_data"] = extra_data
         return result
 
     def buildLeaderboardEntry(self, test):

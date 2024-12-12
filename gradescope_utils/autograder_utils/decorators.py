@@ -149,3 +149,49 @@ class partial_credit(object):
             return func(*args, **kwargs)
 
         return wrapper
+    
+    
+    
+    
+class extra_data(object):
+    """Decorator that indicates that a test may have extra data to emit
+
+    Usage: @extra_data
+
+    Then, within the test, set the value by calling
+    kwargs['set_data'] with a dictionary. You can make this convenient
+    by explicitly declaring a set_data keyword argument, eg.
+
+    ```
+    @extra_data()
+    def test_code(set_data=None):
+        // grab some_data from submission...
+        set_data({ 'key_name': some_data })
+    ```
+    
+    Additonally, a default value can be specified in the decorator. eg.
+    
+    ```
+    @extra_data({ 'key_name': None })
+    def test_code(set_data=None):
+        // any call to set_data would override the default value
+    ```
+    
+    Note: keys and values are cast to strings to be expressed in JSON format.
+    """
+
+    def __init__(self, extra_data = {}):
+        self.extra_data = extra_data
+
+    def __call__(self, func):
+        func.__extra_data__ = self.extra_data
+
+        def set_data(d: dict):
+            wrapper.__extra_data__ = d
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            kwargs['set_data'] = set_data
+            return func(*args, **kwargs)
+
+        return wrapper
